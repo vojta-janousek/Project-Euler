@@ -55,6 +55,9 @@ class Grid():
     Grid number is the puzzle's position number in the data file containing
     all of the puzzles.
     '''
+
+    original_state = None
+
     index_array = [
         [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)],
         [(0, 3), (0, 4), (0, 5), (1, 3), (1, 4), (1, 5), (2, 3), (2, 4), (2, 5)],
@@ -140,7 +143,17 @@ class Grid():
 
         return start_index, end_index
 
-    def load_grid_from_file(self):
+    def load_from_simple_file(self):
+        '''
+        Loads a sudoku puzzle from a file containing a single puzzle in 9 rows,
+        where an unknown tile is denoted by a 0.
+        '''
+        file = open(self.filename, 'r')
+        self.state = [[tile for tile in row.strip('\n').split(',')]
+                      for row in file.readlines()]
+        file.close()
+
+    def load_grid_from_multi_file(self):
         '''
         Loads a sudoku puzzle corresponding to the grid number attribute from
         a file appointed by the file name attribute. The puzzle's state format
@@ -179,15 +192,32 @@ class Grid():
     def load_and_transform(self):
         '''
         Calls the respective loading method base on the input type,
-        then calls the transform method.
+        then calls the transform method. Also saves the original state into
+        a self.original_state variable in case the state need to be reverted
+        after the grid has been solved or modified.
         '''
         if (self.state == None):
-            self.load_grid_from_file()
+            if (self.grid_number == None):
+                self.load_from_simple_file()
+            else:
+                self.load_grid_from_multi_file()
 
         else:
             self.load_grid_from_input()
 
         self.transform()
+        self.original_state = copy.deepcopy(self.state)
+
+    def return_to_original_state(self):
+        '''
+        At the end of the self.load_and_transform method, the original state
+        of the grid object deepcopy is stored within the self.original_state
+        variable.
+
+        Calling this method reverts the current state to the original.
+        This does not overwrite the original state.
+        '''
+        self.state = copy.deepcopy(self.original_state)
 
     def check_row(self, row):
         '''
@@ -336,7 +366,15 @@ class Grid():
 
     def guessing_solution(self):
         '''
-
+        Saves current grid state into a placeholder variable, then makes a list
+        of all unknown tiles.
+        For each unknown tile, goes through the list of its candidates and
+        makes a guess followed by a simple solution attempt. Once it goes
+        through all candidates with no progress, moves on to another unknown
+        tile.
+        If ever a simple solution is found, True is returned and the grid state
+        is changed to the solved puzzle.
+        If there is no solution in all unknown tiles, False is returned.
         '''
         placeholder = copy.deepcopy(self.state)
         available_indexes = []
@@ -361,7 +399,9 @@ class Grid():
 
     def solve(self):
         '''
-
+        Loads and transforms the grid, unless it already has been. Then tries
+        to solve the grid using the simple solution.
+        If unsuccessful, goes on to try the guessing solution.
         '''
         if (self.state == None) or (len(self.state) == 81):
             self.load_and_transform()
