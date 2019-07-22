@@ -1,27 +1,26 @@
 '''
-A sudoku solving script, intended for importing. After importing the Grid class,
-a sudoku puzzle can be defined directly, or within a file.
+A sudoku solving module. After importing the Grid class,
+a sudoku puzzle can be defined directly, or from within a file.
 
-For a direct input, use for example:
+For a direct input, use the following notation:
 
 direct_puzzle = Grid(state='puzzle_string_representaion')
 
 where puzzle_string_representaion is a 81 characters long string of numbers
 on an unsolved sudoku board, row by row. Unknown tiles are denoted by 0.
 
-For a file input, use for example:
+For a file input, use the following notation:
 
 file_puzzle = Grid(filename='sudoku_grids.txt', grid_number=1)
 
 where sudoku_grids.txt is a text file with any number of sudoku grids,
-starting with 'Grid 1' for example, following its rows (each on a separate
-line)
+starting with 'Grid 1', following the grid rows (each on a separate line)
 
 Once the puzzle is defined, it can be displayed using:
 
 print(puzzle)
 
-or solved using:
+and/or solved using:
 
 puzzle.solve()
 
@@ -38,8 +37,8 @@ https://projecteuler.net/problem=96
 
 The entire script assumes perfect use, and does not contain any
 try/except clauses catching incorrect use or inputs.
-It is not a comprehensive sudoku solver and as such does not contain
-any tests and is not anchored on python package index.
+This is not a comprehensive sudoku solver and as such is not anchored
+on the python package index.
 
 '''
 import copy
@@ -53,7 +52,7 @@ class Grid():
     in a triple nested array.
 
     Grid number is the puzzle's position number in the data file containing
-    all of the puzzles.
+    all grids.
     '''
 
     original_state = None
@@ -135,8 +134,8 @@ class Grid():
 
     def grid_number_to_file_index(self):
         '''
-        Converts the grid's number to its starting and ending index
-        within the data file.
+        Converts the grid's position number to its starting and ending index
+        within the multi-grid data file.
         '''
         start_index = ((self.grid_number - 1) * 10) + 1
         end_index = ((self.grid_number - 1) * 10) + 9
@@ -145,7 +144,7 @@ class Grid():
 
     def load_from_simple_file(self):
         '''
-        Loads a sudoku puzzle from a file containing a single puzzle in 9 rows,
+        Loads a sudoku puzzle from a file containing a single puzzle on 9 rows,
         where an unknown tile is denoted by a 0.
         '''
         file = open(self.filename, 'r')
@@ -191,9 +190,9 @@ class Grid():
 
     def load_and_transform(self):
         '''
-        Calls the respective loading method base on the input type,
-        then calls the transform method. Also saves the original state into
-        a self.original_state variable in case the state need to be reverted
+        Calls the respective loading method based on the input type,
+        then calls the transform method. Also copies the original state into
+        a self.original_state attribute in case the state need to be reverted
         after the grid has been solved or modified.
         '''
         if (self.state == None):
@@ -214,14 +213,14 @@ class Grid():
         of the grid object deepcopy is stored within the self.original_state
         variable.
 
-        Calling this method reverts the current state to the original.
+        Calling this method reverts the current state to its original.
         This does not overwrite the original state.
         '''
         self.state = copy.deepcopy(self.original_state)
 
     def check_row(self, row):
         '''
-        Gets the full list of known numbers in the investigated row,
+        Gets the full list of known numbers in the currently investigated row,
         then removes these numbers as candidates from the remaining tiles.
         '''
         working_row = self.state[row]
@@ -335,7 +334,7 @@ class Grid():
         '''
         Checks whether all tiles have been filled and that all rows, columns
         and inner squares contain each digit exactly once. Returns False if any
-        of the checks fail. Returns True if everything checks out.
+        of the checks fail. Returns True otherwise.
         '''
         one_to_nine = [i for i in range(1, 10)]
 
